@@ -1,56 +1,336 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dobill – Subscription & Bill Tracker</title>
 <meta name="description" content="Dobill keeps all your subscriptions in one place, with reminders before every payment. Private by design.">
+<meta property="og:title" content="Dobill – Subscription & Bill Tracker">
+<meta property="og:description" content="Every subscription. Every due date.">
+<meta property="og:image" content="https://dobillapp.github.io/icon.png">
+<meta name="theme-color" content="#5B21B6">
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --violet: #7C3AED; --violet-deep: #5B21B6; --indigo: #312E81;
+  --amber: #FBBF24; --amber-soft: #FDE68A;
+  --bg: #FFFFFF; --bg-alt: #F6F3FD; --card: #FFFFFF;
+  --text: #1B1530; --muted: #5E5873; --line: #E8E3F4; --accent: #6D28D9;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0F0B1C; --bg-alt: #151026; --card: #1C1630; --text: #F2EEFB; --muted: #A9A2BF; --line: #2C2445; --accent: #A78BFA; }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 Inter, -apple-system, "Segoe UI", Roboto, sans-serif; }
+html[lang="ar"] body { font-family: "IBM Plex Sans Arabic", -apple-system, "Segoe UI", Tahoma, sans-serif; }
+a { color: var(--accent); }
+img { max-width: 100%; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+
+/* Language: show only the active one */
+html[lang="en"] [data-ar], html[lang="ar"] [data-en] { display: none !important; }
+
+/* Top bar */
+.bar { position: absolute; inset: 0 0 auto 0; z-index: 5; }
+.bar .wrap { display: flex; align-items: center; justify-content: space-between; height: 72px; }
+.brand { display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; font-weight: 800; font-size: 20px; }
+.brand img { width: 36px; height: 36px; border-radius: 9px; }
+.bar nav { display: flex; align-items: center; gap: 18px; }
+.bar nav a { color: rgba(255,255,255,.88); text-decoration: none; font-weight: 600; font-size: 15px; }
+.lang-btn { border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.1); color: #fff; border-radius: 999px; padding: 6px 14px; font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; }
+.lang-btn:hover { background: rgba(255,255,255,.2); }
+
+/* Hero */
+.hero {
+  position: relative; overflow: hidden; color: #fff;
+  background: radial-gradient(ellipse at 70% 40%, rgba(251,191,36,.20), rgba(251,191,36,0) 55%),
+              linear-gradient(150deg, var(--violet) 0%, var(--violet-deep) 50%, var(--indigo) 100%);
+  padding: 120px 0 0;
+}
+.hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; gap: 40px; align-items: center; }
+.hero h1 { font-size: clamp(38px, 5.4vw, 64px); line-height: 1.08; letter-spacing: -1.5px; margin: 0 0 18px; font-weight: 800; }
+html[lang="ar"] .hero h1 { letter-spacing: 0; line-height: 1.3; font-weight: 700; }
+.hero h1 em { font-style: normal; color: var(--amber); }
+.hero p.lead { font-size: 19px; opacity: .92; margin: 0 0 30px; max-width: 34em; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.store {
+  display: inline-flex; align-items: center; gap: 10px; background: #000; color: #fff; text-decoration: none;
+  border-radius: 14px; padding: 10px 20px; border: 1px solid rgba(255,255,255,.25);
+}
+.store svg { width: 26px; height: 26px; }
+.store small { display: block; font-size: 11px; opacity: .8; line-height: 1.1; }
+.store b { display: block; font-size: 18px; line-height: 1.2; }
+.pill { display: inline-block; padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,.12); font-size: 14px; font-weight: 600; }
+.ticks { list-style: none; padding: 0; margin: 28px 0 0; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 15px; opacity: .9; }
+.ticks li::before { content: "✓"; color: var(--amber); font-weight: 800; margin-inline-end: 8px; }
+
+.phones { position: relative; height: 600px; }
+.phone {
+  position: absolute; width: 250px; border-radius: 40px; padding: 9px; background: #0d0b1a;
+  box-shadow: 0 30px 80px rgba(10,5,40,.55), inset 0 0 0 2px rgba(255,255,255,.08);
+}
+.phone img { display: block; width: 100%; border-radius: 31px; }
+.phone.p1 { left: 50%; top: 0; transform: translateX(-50%); z-index: 2; width: 270px; }
+.phone.p2 { left: 2%; top: 70px; transform: rotate(-8deg); }
+.phone.p3 { right: 2%; top: 70px; transform: rotate(8deg); }
+.spark { position: absolute; background: #fff; clip-path: polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%); }
+
+/* Sections */
+section { padding: 88px 0; }
+section.alt { background: var(--bg-alt); }
+.eyebrow { color: var(--accent); font-weight: 700; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 8px; }
+html[lang="ar"] .eyebrow { letter-spacing: 0; }
+h2 { font-size: clamp(28px, 3.6vw, 40px); line-height: 1.15; margin: 0 0 14px; letter-spacing: -.5px; }
+html[lang="ar"] h2 { letter-spacing: 0; line-height: 1.35; }
+.sub { color: var(--muted); max-width: 40em; margin: 0 0 40px; }
+.center { text-align: center; }
+.center .sub { margin-inline: auto; }
+
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.feature { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 24px; }
+.feature .ic {
+  width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; margin-bottom: 14px;
+  background: linear-gradient(150deg, var(--violet), var(--indigo)); color: #fff;
+}
+.feature .ic svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.feature h3 { margin: 0 0 6px; font-size: 18px; }
+.feature p { margin: 0; color: var(--muted); font-size: 15px; }
+
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+.split .shot { display: flex; justify-content: center; gap: 18px; }
+.split .shot .phone { position: static; transform: none; width: 230px; }
+.split .shot .phone:nth-child(2) { margin-top: 48px; }
+
+.premium {
+  border-radius: 28px; padding: 44px; color: #fff; position: relative; overflow: hidden;
+  background: radial-gradient(ellipse at 85% 20%, rgba(251,191,36,.28), rgba(251,191,36,0) 50%),
+              linear-gradient(150deg, var(--violet) 0%, var(--violet-deep) 55%, var(--indigo) 100%);
+  display: grid; grid-template-columns: auto 1fr; gap: 36px; align-items: center;
+}
+.premium .crown { width: 120px; height: 120px; }
+.premium h2 { color: #fff; }
+.premium p { margin: 0 0 18px; opacity: .92; }
+.premium ul { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+.premium li::before { content: "✓"; color: var(--amber); font-weight: 800; margin-inline-end: 8px; }
+
+.privacy { display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 32px; }
+.privacy .shield { width: 72px; height: 72px; border-radius: 22px; display: grid; place-items: center; background: rgba(124,58,237,.12); color: var(--accent); }
+.privacy .shield svg { width: 38px; height: 38px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.privacy h2 { font-size: 26px; margin-bottom: 6px; }
+.privacy p { margin: 0; color: var(--muted); }
+
+footer { border-top: 1px solid var(--line); padding: 32px 0 44px; color: var(--muted); font-size: 15px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: center; justify-content: space-between; }
+footer nav { display: flex; gap: 22px; }
+footer a { text-decoration: none; font-weight: 600; }
+
+@media (max-width: 880px) {
+  .hero { padding-top: 100px; }
+  .hero .wrap, .split, .premium { grid-template-columns: 1fr; }
+  .hero .copy { text-align: center; }
+  .hero p.lead { margin-inline: auto; }
+  .cta, .ticks { justify-content: center; }
+  .phones { height: 470px; margin-top: 10px; }
+  .phone { width: 190px; border-radius: 32px; padding: 7px; }
+  .phone img { border-radius: 25px; }
+  .phone.p1 { width: 210px; }
+  .phone.p2 { left: -2%; } .phone.p3 { right: -2%; }
+  .grid { grid-template-columns: 1fr 1fr; }
+  .split .shot .phone { width: 170px; }
+  .premium { padding: 32px 24px; text-align: center; }
+  .premium .crown { margin: 0 auto; width: 96px; height: 96px; }
+  .premium ul { grid-template-columns: 1fr; text-align: start; max-width: 340px; margin: 0 auto; }
+  .bar nav a.hide-sm { display: none; }
+}
+@media (max-width: 560px) {
+  .grid { grid-template-columns: 1fr; }
+  .privacy { grid-template-columns: 1fr; text-align: center; }
+  .privacy .shield { margin: 0 auto; }
+  .phone.p2, .phone.p3 { width: 160px; top: 80px; }
+  footer .wrap { justify-content: center; text-align: center; }
+}
+</style>
 </head>
 <body>
-<header class="hero">
-  <img src="icon.png" alt="Dobill icon">
-  <h1>Dobill</h1>
-  <p>Every subscription. Every due date.</p>
-  <p class="ar" lang="ar" dir="rtl">كل اشتراكاتك، وكل مواعيدها</p>
-  <span class="badge">Coming soon on the App Store · قريبًا على App Store</span>
-</header>
-<nav class="top">
-  <a href="./" aria-current="page">Home · الرئيسية</a>
-  <a href="privacy.html">Privacy · الخصوصية</a>
-  <a href="support.html">Support · الدعم</a>
-</nav>
-<main>
-  <section class="card">
-    <h2>Know what renews next, and what it really costs</h2>
-    <ul class="features">
-      <li>Add subscriptions in seconds from a ready-made list, or create your own</li>
-      <li>Reminders before every payment, and a calendar of upcoming bills</li>
-      <li>Monthly and yearly totals, payment history and spending trend</li>
-      <li>Your own logo and color for each subscription</li>
-      <li>Arabic and English, light and dark mode</li>
-      <li>No account and no bank connection: your data stays on your device and in your own iCloud</li>
-    </ul>
-    <p><strong>Dobill Premium</strong> is a one-time purchase: unlimited subscriptions, analytics, iCloud sync, backups and custom reminders, shareable with your family.</p>
-  </section>
 
-  <section class="card" lang="ar" dir="rtl">
-    <h2>اعرف ما الذي سيتجدد قريبًا، وكم يكلّفك فعلًا</h2>
-    <ul class="features">
-      <li>أضف اشتراكاتك في ثوانٍ من قائمة جاهزة، أو أنشئ اشتراكك الخاص</li>
-      <li>تذكير قبل كل دفعة، وتقويم للمدفوعات القادمة</li>
-      <li>إجمالي شهري وسنوي، وسجل المدفوعات، ومنحنى الإنفاق</li>
-      <li>شعار ولون خاص لكل اشتراك</li>
-      <li>العربية والإنجليزية، والوضعان الفاتح والداكن</li>
-      <li>لا حساب ولا ربط بالبنك: بياناتك تبقى على جهازك وفي حساب iCloud الخاص بك</li>
-    </ul>
-    <p><strong>Dobill Premium</strong> شراء لمرة واحدة: اشتراكات بلا حد، والتحليلات، ومزامنة iCloud، والنسخ الاحتياطي، واختيار توقيت التذكير، ويمكن مشاركته مع عائلتك.</p>
-  </section>
-</main>
-<footer>© 2026 Dobill · <a href="privacy.html">Privacy</a> · <a href="support.html">Support</a></footer>
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="icon.png" alt="">Dobill</a>
+    <nav>
+      <a class="hide-sm" href="privacy.html"><span data-en>Privacy</span><span data-ar>الخصوصية</span></a>
+      <a class="hide-sm" href="support.html"><span data-en>Support</span><span data-ar>الدعم</span></a>
+      <button class="lang-btn" type="button" id="lang" aria-label="Switch language"><span data-en>العربية</span><span data-ar>English</span></button>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="spark" style="width:30px;height:30px;top:96px;left:44%"></div>
+  <div class="spark" style="width:22px;height:22px;bottom:40px;left:3%;opacity:.7"></div>
+  <div class="spark" style="width:26px;height:26px;top:180px;right:5%;opacity:.8"></div>
+  <div class="wrap">
+    <div class="copy">
+      <h1>
+        <span data-en>Every subscription.<br><em>Every due date.</em></span>
+        <span data-ar>كل اشتراكاتك،<br><em>وكل مواعيدها.</em></span>
+      </h1>
+      <p class="lead">
+        <span data-en>Dobill keeps all your subscriptions in one place, reminds you before every payment, and shows what you really spend each month.</span>
+        <span data-ar>Dobill يجمع كل اشتراكاتك في مكان واحد، ويذكّرك قبل كل دفعة، ويُريك كم تنفق فعلًا كل شهر.</span>
+      </p>
+      <div class="cta">
+        <span class="store" aria-label="Coming soon on the App Store">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.03-1.5-2.62-1.7-3.19-1.73-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.19-1.54 2.67-.39 6.62 1.11 8.79.73 1.06 1.6 2.25 2.75 2.2 1.1-.04 1.52-.71 2.85-.71 1.33 0 1.71.71 2.88.69 1.19-.02 1.94-1.08 2.66-2.14.84-1.23 1.19-2.42 1.21-2.48-.03-.01-2.32-.89-2.32-3.54zM14.18 6.13c.61-.74 1.02-1.76.91-2.78-.88.04-1.94.59-2.57 1.32-.56.65-1.06 1.69-.93 2.69.98.08 1.98-.5 2.59-1.23z"/></svg>
+          <span><small data-en>Coming soon on the</small><small data-ar>قريبًا على</small><b>App Store</b></span>
+        </span>
+        <span class="pill"><span data-en>iPhone · Arabic & English</span><span data-ar>آيفون · العربية والإنجليزية</span></span>
+      </div>
+      <ul class="ticks">
+        <li><span data-en>No account</span><span data-ar>بلا حساب</span></li>
+        <li><span data-en>No bank connection</span><span data-ar>بلا ربط بالبنك</span></li>
+        <li><span data-en>Free to start</span><span data-ar>ابدأ مجانًا</span></li>
+      </ul>
+    </div>
+    <div class="phones" aria-hidden="true">
+      <div class="phone p2"><img data-shot="calendar" alt=""></div>
+      <div class="phone p3"><img data-shot="analytics" alt=""></div>
+      <div class="phone p1"><img data-shot="list" alt=""></div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap center">
+    <p class="eyebrow"><span data-en>Features</span><span data-ar>المميزات</span></p>
+    <h2><span data-en>Everything you need, nothing you don't</span><span data-ar>كل ما تحتاجه، ولا شيء زائد</span></h2>
+    <p class="sub"><span data-en>Built for the way you actually pay: weekly, monthly, quarterly or yearly, in any currency.</span><span data-ar>مصمَّم لطريقة دفعك الحقيقية: أسبوعيًا أو شهريًا أو كل ثلاثة أشهر أو سنويًا، وبأي عملة.</span></p>
+    <div class="grid" style="text-align:start">
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+        <h3><span data-en>Add in seconds</span><span data-ar>أضف في ثوانٍ</span></h3>
+        <p><span data-en>Pick from a ready-made list of popular services, or create your own.</span><span data-ar>اختر من قائمة جاهزة لأشهر الخدمات، أو أنشئ اشتراكك الخاص.</span></p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+        <h3><span data-en>Timely reminders</span><span data-ar>تذكير في وقته</span></h3>
+        <p><span data-en>Get notified on the day, a day before, or a week before any payment.</span><span data-ar>تنبيه في يوم الدفع، أو قبله بيوم، أو قبله بأسبوع.</span></p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+        <h3><span data-en>Payment calendar</span><span data-ar>تقويم المدفوعات</span></h3>
+        <p><span data-en>See every upcoming bill on a calendar and plan your month.</span><span data-ar>شاهد كل الفواتير القادمة في تقويم وخطّط لشهرك.</span></p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/></svg></div>
+        <h3><span data-en>Spending insights</span><span data-ar>تحليل الإنفاق</span></h3>
+        <p><span data-en>Monthly and yearly totals, payment history and a 12-month trend.</span><span data-ar>إجمالي شهري وسنوي، وسجل المدفوعات، ومنحنى لاثني عشر شهرًا.</span></p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20c.93 0 1.5-.75 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16a6 6 0 0 0 6-6c0-4.97-4.48-9-10-9z"/></svg></div>
+        <h3><span data-en>Make it yours</span><span data-ar>بلمستك الخاصة</span></h3>
+        <p><span data-en>Your own logo and color for each subscription, in light or dark mode.</span><span data-ar>شعار ولون خاص لكل اشتراك، بالوضع الفاتح أو الداكن.</span></p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg></div>
+        <h3><span data-en>iCloud sync</span><span data-ar>مزامنة iCloud</span></h3>
+        <p><span data-en>Keep every device up to date through your own private iCloud.</span><span data-ar>حدّث كل أجهزتك عبر حساب iCloud الخاص بك.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap split">
+    <div>
+      <p class="eyebrow"><span data-en>Light & dark</span><span data-ar>فاتح وداكن</span></p>
+      <h2><span data-en>Beautiful, in your language</span><span data-ar>أنيق، وبلغتك</span></h2>
+      <p class="sub" style="margin-bottom:0"><span data-en>Dobill is fully translated into Arabic and English, with a true right-to-left layout, your local currency and dates, and a look that follows your phone.</span><span data-ar>Dobill مترجم بالكامل إلى العربية والإنجليزية، باتجاه حقيقي من اليمين لليسار، وبعملتك وتواريخك المحلية، وبمظهر يتبع هاتفك.</span></p>
+    </div>
+    <div class="shot" aria-hidden="true">
+      <div class="phone"><img data-shot="list" alt=""></div>
+      <div class="phone"><img data-shot="list-dark" alt=""></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="premium">
+      <svg class="crown" viewBox="0 0 120 120" aria-hidden="true">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FDE68A"/><stop offset="1" stop-color="#F59E0B"/></linearGradient></defs>
+        <path d="M22 84 17 40l23 22 20-34 20 34 23-22-5 44z" fill="url(#g)" stroke="url(#g)" stroke-width="4" stroke-linejoin="round"/>
+        <rect x="20" y="88" width="80" height="13" rx="5" fill="url(#g)"/>
+        <circle cx="17" cy="38" r="6" fill="#FDE68A"/><circle cx="60" cy="27" r="6" fill="#FDE68A"/><circle cx="103" cy="38" r="6" fill="#FDE68A"/>
+        <path d="M46 66l9 9 19-22" fill="none" stroke="#4C1D95" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <p class="eyebrow" style="color:var(--amber-soft)">Dobill Premium</p>
+        <h2><span data-en>Pay once. Yours forever.</span><span data-ar>ادفع مرة واحدة، وتملّكه للأبد.</span></h2>
+        <p><span data-en>No subscription to track your subscriptions. One purchase unlocks everything, and you can share it with your family.</span><span data-ar>لا اشتراك لتتبّع اشتراكاتك. شراء واحد يفتح كل شيء، ويمكنك مشاركته مع عائلتك.</span></p>
+        <ul>
+          <li><span data-en>Unlimited subscriptions</span><span data-ar>اشتراكات بلا حد</span></li>
+          <li><span data-en>Analytics and spending trend</span><span data-ar>التحليلات ومنحنى الإنفاق</span></li>
+          <li><span data-en>iCloud sync across devices</span><span data-ar>مزامنة iCloud بين أجهزتك</span></li>
+          <li><span data-en>Backup and restore</span><span data-ar>النسخ الاحتياطي والاستعادة</span></li>
+          <li><span data-en>Custom reminder timing</span><span data-ar>اختيار توقيت التذكير</span></li>
+          <li><span data-en>Family Sharing</span><span data-ar>المشاركة العائلية</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt" style="padding-top:64px;padding-bottom:64px">
+  <div class="wrap">
+    <div class="privacy">
+      <div class="shield"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
+      <div>
+        <h2><span data-en>Private by design</span><span data-ar>خصوصيتك أولًا</span></h2>
+        <p><span data-en>No accounts, no ads, no tracking. Your data stays on your device and in your own iCloud. We never see it.</span><span data-ar>لا حسابات ولا إعلانات ولا تتبّع. بياناتك تبقى على جهازك وفي حساب iCloud الخاص بك، ولا نطّلع عليها أبدًا.</span>
+          <a href="privacy.html"><span data-en>Read the privacy policy</span><span data-ar>اقرأ سياسة الخصوصية</span></a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Dobill</span>
+    <nav>
+      <a href="privacy.html"><span data-en>Privacy</span><span data-ar>الخصوصية</span></a>
+      <a href="support.html"><span data-en>Support</span><span data-ar>الدعم</span></a>
+      <a href="mailto:azdian@live.com">azdian@live.com</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  function apply(lang) {
+    root.lang = lang;
+    root.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.title = lang === 'ar' ? 'Dobill – تتبّع الاشتراكات والفواتير' : 'Dobill – Subscription & Bill Tracker';
+    document.querySelectorAll('img[data-shot]').forEach(function (img) {
+      img.src = 'img/' + lang + '-' + img.getAttribute('data-shot') + '.jpg';
+    });
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('dobill-lang'); } catch (e) {}
+  var param = (location.search.match(/[?&]lang=(en|ar)\b/) || [])[1];
+  var initial = param || saved ||((navigator.language || '').toLowerCase().indexOf('ar') === 0 ? 'ar' : 'en');
+  apply(initial);
+  document.getElementById('lang').addEventListener('click', function () {
+    var next = root.lang === 'ar' ? 'en' : 'ar';
+    apply(next);
+    try { localStorage.setItem('dobill-lang', next); } catch (e) {}
+  });
+})();
+</script>
 </body>
 </html>
